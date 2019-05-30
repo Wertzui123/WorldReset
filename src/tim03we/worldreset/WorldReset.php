@@ -53,6 +53,31 @@ class WorldReset extends PluginBase {
 
     public function reset() {
         foreach($this->getServer()->getOnlinePlayers() as $player) {
+                if($player->getLevel()->getFolderName() === $world) {
+                    $player->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
+                }
+        }
+        foreach($this->cfg->get("worlds") as $levels) {
+            if(!file_exists($this->getServer()->getDataPath() . "worldreset/$levels.zip")) {
+                $this->getLogger()->alert('A world specified in the config was not found in the "worldreset" folder. Plugin is disabled.');
+                $this->getServer()->getPluginManager()->disablePlugin($this->getServer()->getPluginManager()->getPlugin("WorldReset"));
+                return true;
+            }
+            if($this->getServer()->isLevelLoaded($levels)) {
+                $this->getServer()->unloadLevel($this->getServer()->getLevelByName($levels));
+            }
+            $this->extract($levels);
+            $this->rmFolder($this->getServer()->getDataPath() . "worlds/$levels");
+            $this->extract($levels);
+            $this->getServer()->loadLevel($levels);
+            if($this->cfg->get("message", !false)) {
+                $this->getServer()->broadcastMessage($this->cfg->get("message"));
+            }
+        }
+    }
+    
+     public function resetWorld($world) {
+        foreach($this->getServer()->getOnlinePlayers() as $player) {
             foreach($this->cfg->get("worlds") as $levels) {
                 if($player->getLevel()->getFolderName() === $levels) {
                     $player->teleport($this->getServer()->getDefaultLevel()->getSafeSpawn());
@@ -77,6 +102,7 @@ class WorldReset extends PluginBase {
             }
         }
     }
+
 
     public function rmFolder($file) {
         if (is_dir($file)) {
