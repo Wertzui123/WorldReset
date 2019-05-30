@@ -17,4 +17,6 @@ worlds: []
 # Set the worlds reset message.
 # Use false if you don't want to receive a message.
 message: "The worlds have been reset."
+
+auto-reset: true
 ...
